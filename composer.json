@@ -1,0 +1,20 @@
+{
+    "name": "nawar16/lite-feature-flag-bundle",
+    "description": "A lightweight Symfony Feature Flag bundle focused on developer workflow",
+    "autoload": {
+        "psr-4": {
+            "Nawar16\\LiteFeatureFlagBundle\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "nawar16",
+            "email": "nawarmk98@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/http-kernel": "^7.4",
+        "symfony/config": "^7.4",
+        "symfony/dependency-injection": "^7.4"
+    }
+}

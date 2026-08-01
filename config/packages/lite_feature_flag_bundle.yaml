@@ -1,0 +1,4 @@
+lite_feature_flag_bundle:
+    checkout: true
+    new_ui: false
+    beta_dashboard: true
