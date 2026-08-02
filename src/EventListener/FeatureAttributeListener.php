@@ -4,6 +4,7 @@ namespace Nawar16\LiteFeatureFlagBundle\EventListener;
 
 use Nawar16\LiteFeatureFlagBundle\Attribute\Feature;
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
+use Nawar16\LiteFeatureFlagBundle\Exception\FeatureDisabledException;
 use ReflectionMethod;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -24,8 +25,7 @@ class FeatureAttributeListener
         /** @var Feature $featureAttribute */
         $featureAttribute = $attributes[0]->newInstance();
         $featureName = $featureAttribute->name;
-        if (!$this->featureChecker->isEnabled($featureName)) {
-            throw new NotFoundHttpException(sprintf('The feature "%s" is currently disabled.', $featureName));
-        }
+        if (!$this->featureChecker->isEnabled($featureName)) 
+            throw FeatureDisabledException::forFeature($featureName);
     }
 }
