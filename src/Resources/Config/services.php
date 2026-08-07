@@ -2,6 +2,7 @@
 
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Command\FeatureListCommand;
+use Nawar16\LiteFeatureFlagBundle\Command\FeatureStatusCommand;
 use Nawar16\LiteFeatureFlagBundle\EventListener\FeatureAttributeListener;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
@@ -14,6 +15,10 @@ return static function (ContainerConfigurator $container) {
         ->arg('$featureChecker', service(FeatureChecker::class))
         ->tag('kernel.event_listener', ['event' => 'kernel.controller', 'method' => 'onKernelController']);
     $services->set(FeatureListCommand::class)
+        ->arg('$featureChecker', service(FeatureChecker::class))
+        ->tag('console.command');
+    $services
+        ->set(FeatureStatusCommand::class)
         ->arg('$featureChecker', service(FeatureChecker::class))
         ->tag('console.command');
 };
