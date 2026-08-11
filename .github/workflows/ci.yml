@@ -27,6 +27,11 @@ jobs:
           extensions: mbstring, xml
           coverage: none
 
+      - name: Disable composer SSL verification
+        run: |
+          composer config --global disable-tls true
+          composer config --global secure-http false
+
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist
 
