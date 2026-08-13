@@ -13,7 +13,8 @@ class FeatureProxyTest extends TestCase
     {
         $checker = new FeatureChecker(['new_checkout' => true]);
         $realService = new class {public function process(): string {return 'processed!';}};
-        $proxy = new FeatureProxy($realService, $checker, 'new_checkout');
+        $realServiceInstantiator = fn() => $realService;
+        $proxy = new FeatureProxy($realServiceInstantiator, $checker, 'new_checkout');
         $this->assertSame('processed!', $proxy->process());
     }
 
@@ -21,7 +22,8 @@ class FeatureProxyTest extends TestCase
     {
         $checker = new FeatureChecker(['new_checkout' => false]);
         $realService = new class {public function process(): string { return 'processed!';}};
-        $proxy = new FeatureProxy($realService, $checker, 'new_checkout');
+        $realServiceInstantiator = fn() => $realService;
+        $proxy = new FeatureProxy($realServiceInstantiator, $checker, 'new_checkout');
         $this->expectException(FeatureDisabledException::class);
         $this->expectExceptionMessage('The feature "new_checkout" is currently disabled');
         //blocked
