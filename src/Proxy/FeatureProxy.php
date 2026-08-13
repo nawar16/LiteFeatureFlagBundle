@@ -7,8 +7,13 @@ use Nawar16\LiteFeatureFlagBundle\Exception\FeatureDisabledException;
 
 final class FeatureProxy
 {
+    private ?object $realInstance= null;
+
+    /**
+     * @param callable $decorated
+     */
     public function __construct(
-        private object $decorated,
+        private $decorated,
         private FeatureChecker $checker,
         private string $feature) 
     {}
@@ -17,6 +22,8 @@ final class FeatureProxy
     {
         !$this->checker->isEnabled($this->feature)?
             throw FeatureDisabledException::forFeature($this->feature):'';
-        return $this->decorated->$method(...$arguments);
+        $this->realInstance ===null? $this->realInstance = ($this->decorated)():'';
+        return $this->realInstance->$method(...$arguments);
+        //return $this->decorated->$method(...$arguments);
     }
 }

@@ -10,6 +10,7 @@ use ReflectionClass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 class FeatureProxyPass implements CompilerPassInterface
 {
@@ -31,8 +32,13 @@ class FeatureProxyPass implements CompilerPassInterface
             //definition pointing to the Proxy as id
             $proxyDefinition = new Definition(FeatureProxy::class);
             $proxyDefinition->setFactory([FeatureProxyFactory::class, 'createProxy']);
+            // $proxyDefinition->setArguments([
+            //     $container->getDefinition($innerServiceId),
+            //     $container->getDefinition(FeatureChecker::class),
+            //     $featureName
+            // ]);
             $proxyDefinition->setArguments([
-                $container->getDefinition($innerServiceId),
+                new Definition(null, [new Reference($innerServiceId)]), 
                 $container->getDefinition(FeatureChecker::class),
                 $featureName
             ]);
