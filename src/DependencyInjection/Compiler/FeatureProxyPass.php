@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 
 class FeatureProxyPass implements CompilerPassInterface
 {
@@ -37,10 +38,15 @@ class FeatureProxyPass implements CompilerPassInterface
             //     $container->getDefinition(FeatureChecker::class),
             //     $featureName
             // ]);
+            // $proxyDefinition->setArguments([
+            //     new Definition(null, [new Reference($innerServiceId)]), 
+            //     $container->getDefinition(FeatureChecker::class),
+            //     $featureName
+            // ]);
             $proxyDefinition->setArguments([
-                new Definition(null, [new Reference($innerServiceId)]), 
-                $container->getDefinition(FeatureChecker::class),
-                $featureName
+                new ServiceClosureArgument(new Reference($innerServiceId)),
+                new Reference(FeatureChecker::class),
+                $featureName,
             ]);
             $proxyDefinition->setPublic($definition->isPublic());
             $proxyDefinition->setShared($definition->isShared());
