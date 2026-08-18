@@ -49,17 +49,14 @@ class ProxyIntegrationTest extends TestCase
         $container->compile();
         return $container;
     }
-
-    public static function proxyFactoryBridge(
-        object $realService,
-        string $targetClass,
-        FeatureChecker $checker
-    ): FeatureProxy {
+    public static function proxyFactoryBridge(mixed $realService,string $targetClass,FeatureChecker $checker): FeatureProxy 
+    {
         $reflection = new \ReflectionClass($targetClass);
         $attributes = $reflection->getAttributes(Feature::class);
         if (!$attributes) throw new \RuntimeException(sprintf('No Feature attribute found on class %s', $targetClass));
-        $attribute = $attributes[0]->newInstance();
-        return new FeatureProxy($realService,$checker,$attribute);
+        $attribute = $attributes[0]->newInstance();   
+        $callback = is_callable($realService) ? $realService : fn() => $realService;
+        return new FeatureProxy($callback,$checker,$attribute);
     }
     public function testEnabledFeatureCallsRealService(): void
     {

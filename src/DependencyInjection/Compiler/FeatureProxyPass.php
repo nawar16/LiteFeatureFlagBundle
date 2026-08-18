@@ -6,47 +6,38 @@ use Nawar16\LiteFeatureFlagBundle\Attribute\Feature;
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Proxy\FeatureProxy;
 use Nawar16\LiteFeatureFlagBundle\Proxy\FeatureProxyFactory;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
+use ReflectionClass;
 
-class FeatureProxyPass implements CompilerPassInterface
+final class FeatureProxyPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if(!$container->hasDefinition(FeatureChecker::class)) return;
+        if (!$container->hasDefinition(FeatureChecker::class)) return;
         foreach ($container->getDefinitions() as $id => $definition) {
             $class = $definition->getClass();
             if (!$class || !class_exists($class)) continue;
             $reflectionClass = new ReflectionClass($class);
             $attributes = $reflectionClass->getAttributes(Feature::class);
             if (empty($attributes)) continue;
-            /** @var Feature $featureAttribute */
-            $featureAttribute = $attributes[0]->newInstance();
-            $featureName = $featureAttribute->name;
-            //backup to prevent collisions
+            $firstAttribute = $attributes[0]; 
+            $featureAttribute = $firstAttribute->newInstance();
             $innerServiceId = $id . '.inner_feature_service';
             $container->setDefinition($innerServiceId, clone $definition);
-            //definition pointing to the Proxy as id
+            $closureReference = new Reference($innerServiceId, ContainerBuilder::IGNORE_ON_INVALID_REFERENCE);
             $proxyDefinition = new Definition(FeatureProxy::class);
             $proxyDefinition->setFactory([FeatureProxyFactory::class, 'createProxy']);
-            // $proxyDefinition->setArguments([
-            //     $container->getDefinition($innerServiceId),
-            //     $container->getDefinition(FeatureChecker::class),
-            //     $featureName
-            // ]);
-            // $proxyDefinition->setArguments([
-            //     new Definition(null, [new Reference($innerServiceId)]), 
-            //     $container->getDefinition(FeatureChecker::class),
-            //     $featureName
-            // ]);
             $proxyDefinition->setArguments([
-                new ServiceClosureArgument(new Reference($innerServiceId)),
+                $closureReference, 
                 new Reference(FeatureChecker::class),
-                $featureName,
+                new Definition(Feature::class, [
+                    $featureAttribute->name,
+                    $featureAttribute->disabled,
+                    $featureAttribute->fallback
+                ])
             ]);
             $proxyDefinition->setPublic($definition->isPublic());
             $proxyDefinition->setShared($definition->isShared());

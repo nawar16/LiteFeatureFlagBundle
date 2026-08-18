@@ -2,39 +2,38 @@
 
 namespace Nawar16\LiteFeatureFlagBundle\Proxy;
 
+use BadMethodCallException;
 use Nawar16\LiteFeatureFlagBundle\Attribute\Feature;
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Exception\FeatureDisabledException;
 
 final class FeatureProxy
 {
-    private ?object $realInstance= null;
-
-    /**
-     * @param callable $decorated
-     */
+    private ?object $realInstance = null;
     public function __construct(
-        private object $decorated,
+        private $decorated, //callback closure
         private FeatureChecker $checker,
-        private Feature $attribute) 
-    {}
-
+        private Feature $attribute
+    ) {}
     public function __call(string $method, array $arguments): mixed
     {
-        if($this->checker->isEnabled($this->attribute->name))
-            return $this->decorated->$method(...$arguments);
-        if ($this->attribute->disabled === Feature::STRATEGY_FALLBACK) {
-            $fallbackMethod = $this->attribute->fallback;
-            if (!$fallbackMethod || !method_exists($this->decorated, $fallbackMethod)) {
-                throw new \BadMethodCallException(sprintf(
-                    'Fallback strategy was requested for feature "%s", but fallback method "%s" does not exist on class %s',
-                    $this->attribute->name,
-                    $fallbackMethod ?? 'null',
-                    get_class($this->decorated)
-                ));
+        if (!$this->checker->isEnabled($this->attribute->name)) {
+            if ($this->attribute->disabled === Feature::STRATEGY_FALLBACK) {
+                $fallbackMethod = $this->attribute->fallback;
+                $instance = $this->getRealInstance();
+                if (!$fallbackMethod || !method_exists($instance, $fallbackMethod)) 
+                    throw new BadMethodCallException(sprintf('Fallback method "%s" missing', $fallbackMethod));
+                return $instance->$fallbackMethod(...$arguments);
             }
-            return $this->decorated->$fallbackMethod(...$arguments);
+            throw FeatureDisabledException::forFeature($this->attribute->name);
         }
-        throw FeatureDisabledException::forFeature($this->attribute->name);
+        return $this->getRealInstance()->$method(...$arguments);
+    }
+
+    private function getRealInstance(): object
+    {
+        if ($this->realInstance === null) 
+            $this->realInstance = ($this->decorated)();
+        return $this->realInstance;
     }
 }
