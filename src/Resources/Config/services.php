@@ -12,7 +12,7 @@ return static function (ContainerConfigurator $container) {
     $services = $container->services();
     $services
         ->set(EnvironmentFeatureResolver::class)
-        ->arg('$environmentsConfig', '%lite_feature_flags.environments%');
+        ->arg('$environmentsConfig', '%lite_feature_flag.environments%');
 
     $services->set(FeatureChecker::class)
         ->arg('$flags', '%lite_feature_flag.flags%')

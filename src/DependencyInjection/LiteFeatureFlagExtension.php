@@ -14,6 +14,7 @@ class LiteFeatureFlagExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
         $container->setParameter('lite_feature_flag.flags', $config);   
+        $container->setParameter('lite_feature_flag.environments', $config['environments'] ?? []);
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.php');
     }
