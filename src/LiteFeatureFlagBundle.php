@@ -3,6 +3,7 @@
 namespace Nawar16\LiteFeatureFlagBundle;
 
 use Nawar16\LiteFeatureFlagBundle\DependencyInjection\Compiler\FeatureProxyPass;
+use Nawar16\LiteFeatureFlagBundle\DependencyInjection\Compiler\RegisterResolversPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -12,5 +13,6 @@ class LiteFeatureFlagBundle extends Bundle
     {
         parent::build($container);
         $container->addCompilerPass(new FeatureProxyPass());
+        $container->addCompilerPass(new RegisterResolversPass());
     }
 }
