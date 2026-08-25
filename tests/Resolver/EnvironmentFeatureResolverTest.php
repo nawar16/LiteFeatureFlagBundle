@@ -23,21 +23,24 @@ class EnvironmentFeatureResolverTest extends TestCase
     public function testResolverEnablesFeatureOnMatchingEnvironment(): void
     {
         $resolver = new EnvironmentFeatureResolver($this->mockEnvConfig);
-        $checker = new FeatureChecker(['new_checkout' => false], [$resolver]);
+        $checker = new FeatureChecker(['new_checkout' => false]);
+        $checker->setResolvers([$resolver]);
         $context = new FeatureContext(environment: 'dev');
         $this->assertTrue($checker->isEnabled('new_checkout', $context));
     }
     public function testResolverDisablesFeatureOnMatchingEnvironment(): void
     {
         $resolver = new EnvironmentFeatureResolver($this->mockEnvConfig);
-        $checker = new FeatureChecker(['new_checkout' => true], [$resolver]);
+        $checker = new FeatureChecker(['new_checkout' => true]);
+        $checker->setResolvers([$resolver]);
         $context = new FeatureContext(environment: 'prod');
         $this->assertFalse($checker->isEnabled('new_checkout', $context));
     }
     public function testCheckerFallsBackToYamlDefaultsWhenEnvironmentIsOmitted(): void
     {
         $resolver = new EnvironmentFeatureResolver($this->mockEnvConfig);
-        $checker = new FeatureChecker(['new_checkout' => true], [$resolver]);
+        $checker = new FeatureChecker(['new_checkout' => true]);
+        $checker->setResolvers([$resolver]);
         $context = new FeatureContext();
         $this->assertTrue($checker->isEnabled('new_checkout', $context));
     }
@@ -45,7 +48,8 @@ class EnvironmentFeatureResolverTest extends TestCase
     public function testCheckerFallsBackToYamlDefaultsWhenEnvironmentNotConfigured(): void
     {
         $resolver = new EnvironmentFeatureResolver($this->mockEnvConfig);
-        $checker = new FeatureChecker(['new_checkout' => true], [$resolver]);
+        $checker = new FeatureChecker(['new_checkout' => true]);
+        $checker->setResolvers([$resolver]);
         $context = new FeatureContext(environment: 'staging');
         $this->assertTrue($checker->isEnabled('new_checkout', $context));
     }
