@@ -19,4 +19,5 @@ final class EnvironmentFeatureResolver implements FeatureResolverInterface
             return (bool)$featureRules[$context->environment];
         return null;
     }
+    public function priority(): int{return 200;}
 }
