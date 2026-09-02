@@ -28,7 +28,7 @@ class FeatureCheckerOverrideTest extends TestCase
     public function testEnableOverride(): void
     {
         $checker = new FeatureChecker(['checkout' => false]);
-        $checker->enable('checkout');
+        $checker->enable('checkout');   
         $this->assertTrue($checker->isEnabled('checkout'));
         $this->assertTrue($checker->isOverridden('checkout'));
     }
@@ -64,7 +64,7 @@ class FeatureCheckerOverrideTest extends TestCase
     {
         $checker = new FeatureChecker(['checkout' => true]);
         $_ENV['FEATURE_CHECKOUT'] = 'true';
-        $checker->disable('checkout');
+        $checker->disable('checkout'); 
         $this->assertFalse($checker->isEnabled('checkout')); 
     }
     public function testResolverStillWorksWithoutOverride(): void
