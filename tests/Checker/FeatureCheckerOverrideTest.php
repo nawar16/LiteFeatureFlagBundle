@@ -73,8 +73,7 @@ class FeatureCheckerOverrideTest extends TestCase
             public function resolve(string $f, FeatureContext $c): ?bool { return true; }
             public function priority(): int { return 1; }
         };
-        $checker = new FeatureChecker(['checkout' => false]);
-        $checker->setResolvers([$resolver]);
+        $checker = new FeatureChecker(['checkout' => false], [$resolver]);
         $this->assertTrue($checker->isEnabled('checkout'));
     }
 }
