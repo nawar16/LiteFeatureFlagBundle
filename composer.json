@@ -3,6 +3,8 @@
     "description": "A lightweight Symfony Feature Flag bundle focused on developer workflow",
     "type": "symfony-bundle",
     "license": "MIT",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Nawar16\\LiteFeatureFlagBundle\\": "src/"
