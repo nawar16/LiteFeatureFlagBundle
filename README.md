@@ -65,3 +65,56 @@ class CheckoutService
     }
 }
 ```
+
+
+### Creating a Custom Resolver
+You can easily extend the bundle by writing custom domain logic (for example matching a runtime context) by implementing `FeatureResolverInterface` and tagging it:
+
+```php
+use Nawar16\LiteFeatureFlagBundle\Resolver\FeatureResolverInterface;
+use Nawar16\LiteFeatureFlagBundle\Context\FeatureContext;
+
+final class CustomTenantResolver implements FeatureResolverInterface
+{
+    public function resolve(string feature, FeatureContext context): ?bool 
+    {
+        //logic
+        return null; //true/false to decide, or null to yield to lower priority resolvers
+    }
+    public function priority(): int 
+    {
+        return 100; // Ordered descending via Compiler Pass mapping
+    }
+}
+```
+
+
+## Testing Integration
+The bundle includes a native test state store allowing you to force feature behaviors inside your test suites without container configuration manipulation
+
+```php
+use Nawar16\LiteFeatureFlagBundle\Testing\FeatureFlagTestTrait;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+final class CheckoutTest extends KernelTestCase
+{
+    use FeatureFlagTestTrait; //automatic clean up after each test method
+
+    public function testNewCheckoutFlow(): void
+    {
+        \(this->enableFeature('beta_checkout');\)this->assertFeatureEnabled('beta_checkout');
+        
+        //execution behavior
+    }
+}
+```
+
+## CLI Tooling
+Monitor the application flag states directly via the terminal:
+```bash
+# List all configured flags
+php bin/console feature:list
+
+# Inspect the state of a targeted flag
+php bin/console feature:status beta_checkout
+```
