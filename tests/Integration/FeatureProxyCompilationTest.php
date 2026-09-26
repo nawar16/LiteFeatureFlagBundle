@@ -10,6 +10,8 @@ use Nawar16\LiteFeatureFlagBundle\Proxy\FeatureProxy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
+use Symfony\Component\DependencyInjection\Definition;
 
 #[Feature('new_payment')]
 final class PaymentService {
@@ -29,7 +31,14 @@ class FeatureProxyCompilationTest extends TestCase
     private function createCompiledContainer(array $flags): ContainerBuilder
     {
         $container = new ContainerBuilder();
-        $container->register(FeatureChecker::class)->setArguments([$flags])->setPublic(true);
+
+        $container->setParameter('lite_feature_flag.flags', $flags);
+        $container->register(ConfigFeatureStorage::class)
+            ->setArguments([$flags]);
+        $container->register(FeatureChecker::class)
+            ->setArguments([new Reference(ConfigFeatureStorage::class),[]])->setPublic(true);
+
+
         $container->register('payment_service', PaymentService::class)->setPublic(true);
         $container->register('fallback_service', CheckoutServiceWithFallback::class)->setPublic(true);
         $container->register('standard_service', StandardUnflaggedService::class)->setPublic(true);

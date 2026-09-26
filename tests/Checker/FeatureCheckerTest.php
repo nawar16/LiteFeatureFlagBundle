@@ -30,9 +30,10 @@ class FeatureCheckerTest extends TestCase
     }
     public function testAllReturnsCompleteArray(): void
     {
-        $flags = new ConfigFeatureStorage(['checkout' => true, 'new_ui' => false]);
-        $checker = new FeatureChecker($flags);
-        $this->assertSame($flags, $checker->all());
+        $expectedData = ['checkout' => true, 'new_ui' => false];
+        $storage = new ConfigFeatureStorage($expectedData);
+        $checker = new FeatureChecker($storage);
+        $this->assertSame($expectedData, $checker->all());
     }
     public function testIsEnabledOverriddenByEnvVarTrue(): void
     {

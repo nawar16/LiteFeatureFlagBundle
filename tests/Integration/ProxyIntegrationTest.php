@@ -11,6 +11,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
+use Symfony\Component\DependencyInjection\Definition;
 
 #[Feature('new_checkout')]
 class MockCheckoutService
@@ -27,7 +29,19 @@ class ProxyIntegrationTest extends TestCase
     private function buildTestContainer(array $configuredFlags): ContainerBuilder
     {
         $container = new ContainerBuilder();
-        $container->register(FeatureChecker::class)->setArguments([$configuredFlags])->setPublic(true);
+
+    
+        $container->setParameter('lite_feature_flag.flags', $configuredFlags);
+        $container->register(ConfigFeatureStorage::class)
+            ->setArguments(['$flags' => '%lite_feature_flag.flags%']);
+        $container->register(FeatureChecker::class)
+            ->setArguments([
+                '$storage' => new Reference(ConfigFeatureStorage::class),
+                '$resolvers' => []
+            ])
+            ->setPublic(true);
+
+
         $container->register('app.checkout_service', MockCheckoutService::class)->setPublic(true);
         $container->register('app.normal_service', MockNormalService::class)->setPublic(true);
         $featureClasses = [];
