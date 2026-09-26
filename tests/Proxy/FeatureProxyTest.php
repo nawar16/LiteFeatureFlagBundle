@@ -6,13 +6,14 @@ use Nawar16\LiteFeatureFlagBundle\Attribute\Feature;
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Exception\FeatureDisabledException;
 use Nawar16\LiteFeatureFlagBundle\Proxy\FeatureProxy;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
 use PHPUnit\Framework\TestCase;
 
 class FeatureProxyTest extends TestCase
 {
     public function testProxyForwardsCallWhenFeatureIsEnabled(): void
     {
-        $checker = new FeatureChecker(['new_checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['new_checkout' => true]));
         $realService = new class {public function process(): string {return 'processed!';}};
         $realServiceInstantiator = fn() => $realService;
         $feature = new Feature('new_checkout');
@@ -22,7 +23,7 @@ class FeatureProxyTest extends TestCase
 
     public function testProxyThrowsExceptionWhenFeatureIsDisabled(): void
     {
-        $checker = new FeatureChecker(['new_checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['new_checkout' => false]));
         $realService = new class {public function process(): string { return 'processed!';}};
         $realServiceInstantiator = fn() => $realService;
         $feature = new Feature('new_checkout');

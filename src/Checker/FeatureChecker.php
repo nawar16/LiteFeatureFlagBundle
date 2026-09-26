@@ -3,12 +3,14 @@
 namespace Nawar16\LiteFeatureFlagBundle\Checker;
 
 use Nawar16\LiteFeatureFlagBundle\Context\FeatureContext;
+use Nawar16\LiteFeatureFlagBundle\Storage\FeatureStorageInterface;
 
 class FeatureChecker
 {
     private array $overrides = [];
     public function __construct(
-        private readonly array $flags,
+        //private readonly array $flags,
+        private readonly FeatureStorageInterface $storage,
         private readonly array $resolvers = []
     ) {}
 
@@ -24,7 +26,8 @@ class FeatureChecker
             $decision = $resolver->resolve($feature, $context);
             if ($decision !== null) return $decision;
         }
-        return (bool) ($this->flags[$feature] ?? false);
+        return (bool) ($this->storage->get($feature) ?? false);
+        //return (bool) ($this->flags[$feature] ?? false);
     }
     public function enable(string $feature): void
     {
@@ -52,6 +55,7 @@ class FeatureChecker
     }
     public function all(): array
     {
-        return $this->flags;
+        return $this->storage->all();
+        //return $this->flags;
     }
 }

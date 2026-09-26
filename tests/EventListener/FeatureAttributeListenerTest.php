@@ -6,6 +6,7 @@ use Nawar16\LiteFeatureFlagBundle\Attribute\Feature;
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\EventListener\FeatureAttributeListener;
 use Nawar16\LiteFeatureFlagBundle\Exception\FeatureDisabledException;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -15,7 +16,7 @@ class FeatureAttributeListenerTest extends TestCase
 {
     public function testListenerDoesNotBlockEnabledFeatures(): void
     {
-        $checker = new FeatureChecker(['checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true]));
         $listener = new FeatureAttributeListener($checker);
         $mockController = new class {#[Feature('checkout')]public function checkoutAction(): void {}};
         $event = $this->createControllerEvent([$mockController, 'checkoutAction']);
@@ -25,7 +26,7 @@ class FeatureAttributeListenerTest extends TestCase
 
     public function testListenerThrowsCustomExceptionWhenFeatureDisabled(): void
     {
-        $checker = new FeatureChecker(['checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => false]));
         $listener = new FeatureAttributeListener($checker);
         $mockController = new class {#[Feature('checkout')]
             public function checkoutAction(): void {}

@@ -4,6 +4,7 @@ namespace Nawar16\LiteFeatureFlagBundle\Tests\Command;
 
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Command\FeatureListCommand;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -12,7 +13,7 @@ class FeatureListCommandTest extends TestCase
 {
     public function testExecuteRendersFeatureTableCorrectly(): void
     {
-        $checker = new FeatureChecker(['checkout' => true,'new_ui' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true,'new_ui' => false]));
         $application = new Application();
         $application->add(new FeatureListCommand($checker));
         $command = $application->find('feature:list');
@@ -29,7 +30,7 @@ class FeatureListCommandTest extends TestCase
 
     public function testExecuteShowsWarningWhenNoFlagsConfigured(): void
     {
-        $checker = new FeatureChecker([]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage([]));
         $application = new Application();
         $application->add(new FeatureListCommand($checker));
         $command = $application->find('feature:list');

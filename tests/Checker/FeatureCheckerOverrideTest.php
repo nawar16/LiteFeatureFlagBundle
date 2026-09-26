@@ -6,48 +6,49 @@ use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Context\FeatureContext;
 use Nawar16\LiteFeatureFlagBundle\Resolver\FeatureResolverInterface;
 use PHPUnit\Framework\TestCase;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
 
 class FeatureCheckerOverrideTest extends TestCase
 {
     protected function tearDown(): void{unset($_ENV['FEATURE_CHECKOUT']);}
     public function testConfiguredFeatureIsEnabled(): void
     {
-        $checker = new FeatureChecker(['checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true]));
         $this->assertTrue($checker->isEnabled('checkout'));
     }
     public function testConfiguredFeatureIsDisabled(): void
     {
-        $checker = new FeatureChecker(['checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => false]));
         $this->assertFalse($checker->isEnabled('checkout'));
     }
     public function testUnknownFeatureIsDisabled(): void
     {
-        $checker = new FeatureChecker([]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage([]));
         $this->assertFalse($checker->isEnabled('unknown'));
     }
     public function testEnableOverride(): void
     {
-        $checker = new FeatureChecker(['checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => false]));
         $checker->enable('checkout');   
         $this->assertTrue($checker->isEnabled('checkout'));
         $this->assertTrue($checker->isOverridden('checkout'));
     }
     public function testDisableOverride(): void
     {
-        $checker = new FeatureChecker(['checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true]));
         $checker->disable('checkout');
         $this->assertFalse($checker->isEnabled('checkout'));
     }
     public function testResetOverride(): void
     {
-        $checker = new FeatureChecker(['checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true]));
         $checker->disable('checkout');
         $checker->reset('checkout');
         $this->assertTrue($checker->isEnabled('checkout'));
     }
     public function testResetAllOverrides(): void
     {
-        $checker = new FeatureChecker(['a' => true, 'b' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['a' => true, 'b' => false]));
         $checker->disable('a');
         $checker->enable('b');
         $checker->resetAll();
@@ -56,13 +57,13 @@ class FeatureCheckerOverrideTest extends TestCase
     }
     public function testOverrideWinsOverYaml(): void
     {
-        $checker = new FeatureChecker(['checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true]));
         $checker->disable('checkout');
         $this->assertFalse($checker->isEnabled('checkout'));
     }
     public function testOverrideWinsOverEnvironment(): void
     {
-        $checker = new FeatureChecker(['checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => true]));
         $_ENV['FEATURE_CHECKOUT'] = 'true';
         $checker->disable('checkout'); 
         $this->assertFalse($checker->isEnabled('checkout')); 
@@ -73,7 +74,7 @@ class FeatureCheckerOverrideTest extends TestCase
             public function resolve(string $f, FeatureContext $c): ?bool { return true; }
             public function priority(): int { return 1; }
         };
-        $checker = new FeatureChecker(['checkout' => false], [$resolver]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => false]), [$resolver]);
         $this->assertTrue($checker->isEnabled('checkout'));
     }
 }

@@ -7,6 +7,7 @@ use Nawar16\LiteFeatureFlagBundle\Attribute\Feature;
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Exception\FeatureDisabledException;
 use Nawar16\LiteFeatureFlagBundle\Proxy\FeatureProxy;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
 use PHPUnit\Framework\TestCase;
 
 class MockCheckoutServiceEngine
@@ -19,7 +20,7 @@ class FeatureProxyStrategyTest extends TestCase
 {
     public function testExceptionStrategyThrowsWhenDisabled(): void
     {
-        $checker = new FeatureChecker(['new_checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['new_checkout' => false]));
         $realService = new MockCheckoutServiceEngine();
         $attribute = new Feature(name: 'new_checkout', disabled: Feature::STRATEGY_EXCEPTION);
         $proxy = new FeatureProxy(fn() => $realService, $checker, $attribute);
@@ -29,7 +30,7 @@ class FeatureProxyStrategyTest extends TestCase
     }
     public function testFallbackStrategyRoutesToAlternativeMethodWhenDisabled(): void
     {
-        $checker = new FeatureChecker(['new_checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['new_checkout' => false]));
         $realService = new MockCheckoutServiceEngine();
         $attribute = new Feature(name: 'new_checkout', disabled: Feature::STRATEGY_FALLBACK, fallback: 'legacyProcess');
         $proxy = new FeatureProxy(fn() => $realService, $checker, $attribute);
@@ -38,7 +39,7 @@ class FeatureProxyStrategyTest extends TestCase
 
     public function testFallbackStrategyErrorsOutGracefullyIfMethodMissing(): void
     {
-        $checker = new FeatureChecker(['new_checkout' => false]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['new_checkout' => false]));
         $realService = new MockCheckoutServiceEngine();
         $attribute = new Feature(name: 'new_checkout', 
             disabled: Feature::STRATEGY_FALLBACK, 
@@ -52,7 +53,7 @@ class FeatureProxyStrategyTest extends TestCase
 
     public function testBothStrategiesBypassAndRunRealServiceWhenEnabled(): void
     {
-        $checker = new FeatureChecker(['new_checkout' => true]);
+        $checker = new FeatureChecker(new ConfigFeatureStorage(['new_checkout' => true]));
         $realService = new MockCheckoutServiceEngine();
         $attribute = new Feature(name: 'new_checkout', 
             disabled: Feature::STRATEGY_FALLBACK, 

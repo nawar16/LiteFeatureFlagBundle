@@ -5,6 +5,9 @@ use Nawar16\LiteFeatureFlagBundle\Command\FeatureListCommand;
 use Nawar16\LiteFeatureFlagBundle\Command\FeatureStatusCommand;
 use Nawar16\LiteFeatureFlagBundle\EventListener\FeatureAttributeListener;
 use Nawar16\LiteFeatureFlagBundle\Resolver\EnvironmentFeatureResolver;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
+use Nawar16\LiteFeatureFlagBundle\Storage\FeatureStorageInterface;
+use Nawar16\LiteFeatureFlagBundle\Storage\InMemoryFeatureStorage;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -13,12 +16,24 @@ return static function (ContainerConfigurator $container) {
     $services
         ->set(EnvironmentFeatureResolver::class)
         ->arg('$environmentsConfig', '%lite_feature_flag.environments%');
+    // $services->set(FeatureChecker::class)
+    //     ->arg('$flags', '%lite_feature_flag.flags%')
+    //     ->arg('$resolvers', [
+    //         service(EnvironmentFeatureResolver::class)
+    //     ]);
 
+
+    $services->set(ConfigFeatureStorage::class)->arg('$flags', '%lite_feature_flag.flags%');
+    $services->set(InMemoryFeatureStorage::class);
+    $services->alias(FeatureStorageInterface::class, ConfigFeatureStorage::class);
     $services->set(FeatureChecker::class)
-        ->arg('$flags', '%lite_feature_flag.flags%')
+        ->arg('$storage', service(FeatureStorageInterface::class))
         ->arg('$resolvers', [
             service(EnvironmentFeatureResolver::class)
         ]);
+
+
+
     $services->set(FeatureAttributeListener::class)
         ->arg('$featureChecker', service(FeatureChecker::class))
         ->tag('kernel.event_listener', ['event' => 'kernel.controller', 'method' => 'onKernelController']);

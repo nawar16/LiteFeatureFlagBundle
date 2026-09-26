@@ -3,6 +3,7 @@
 namespace Nawar16\LiteFeatureFlagBundle\Tests\Testing;
 
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
+use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
 use Nawar16\LiteFeatureFlagBundle\Testing\FeatureFlagTestTrait;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -11,7 +12,7 @@ class FeatureFlagTestTraitTest extends KernelTestCase
 {
     use FeatureFlagTestTrait;
     private FeatureChecker $mockChecker;
-    protected function setUp(): void{$this->mockChecker = new FeatureChecker(['checkout' => false]);}
+    protected function setUp(): void{$this->mockChecker = new FeatureChecker(new ConfigFeatureStorage(['checkout' => false]));}
     protected function getFeatureChecker(): FeatureChecker
     {
         return $this->mockChecker;
