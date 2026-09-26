@@ -4,6 +4,7 @@ namespace Nawar16\LiteFeatureFlagBundle\Tests\Checker;
 
 use Nawar16\LiteFeatureFlagBundle\Checker\FeatureChecker;
 use Nawar16\LiteFeatureFlagBundle\Storage\ConfigFeatureStorage;
+use Nawar16\LiteFeatureFlagBundle\Storage\InMemoryFeatureStorage;
 use PHPUnit\Framework\TestCase;
 
 class FeatureCheckerTest extends TestCase
@@ -52,5 +53,18 @@ class FeatureCheckerTest extends TestCase
         $_ENV['FEATURE_RANDOM_FEATURE'] = 'true';
         $checker = new FeatureChecker(new ConfigFeatureStorage([]));
         $this->assertTrue($checker->isEnabled('random_feature'));
+    }
+
+    public function testCheckerCanUseDifferentStorage(): void
+    {
+        $storage = new InMemoryFeatureStorage(['new_checkout' => true,]);
+        $checker = new FeatureChecker($storage);
+        self::assertTrue($checker->isEnabled('new_checkout'));
+    }
+    public function testUnknownFeatureIsDisabledWithInMemoryStorage(): void
+    {
+        $storage = new InMemoryFeatureStorage();
+        $checker = new FeatureChecker($storage);
+        self::assertFalse($checker->isEnabled('does_not_exist'));
     }
 }
